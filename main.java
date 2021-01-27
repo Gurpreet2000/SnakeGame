@@ -17,12 +17,18 @@ class Node {
 
 class Fruit {
     int x, y;
+
+    Fruit(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 }
 
 class Main {
 
     static Node head = null, tail = null;
     static char board[][] = new char[20][20];
+    static Fruit fruit = null;
 
     public static void main(String[] args) throws Exception {
         System.out.println(
@@ -58,6 +64,21 @@ class Main {
             dir = inputDirection();
         }
         System.out.println("Game Over!");
+    }
+
+    static Fruit makeFruit(Node head) {
+        Node n = head;
+        Random r = new Random();
+        Fruit f = new Fruit(r.nextInt(board.length - 1), r.nextInt(board.length - 1));
+        while (n != null) {
+            if (f.x == head.x && f.y == head.y) {
+                f = new Fruit(r.nextInt(board.length - 1), r.nextInt(board.length - 1));
+            } else {
+                n = n.next;
+            }
+        }
+        board[f.x][f.y] = 'F';
+        return f;
     }
 
     static char inputDirection() {
@@ -101,38 +122,46 @@ class Main {
             if (n.x == x && n.y == y)
                 return -1;
         }
+
         // give snake its new coordinates
-        tail = tail.prev;
-        tail.next = null;
-        tail.value = 'Y';
         Node n = head;
         n.value = 'x';
         head = new Node(x, y, val);
         head.next = n;
         n.prev = head;
+        // check is snake ate fruit
+        if (fruit.x == head.x && fruit.y == head.y) {
+            fruit = makeFruit(head);
+        } else {
+            board[tail.x][tail.y] = 0;
+            tail = tail.prev;
+            tail.next = null;
+            tail.value = 'Y';
+        }
         return 1;
     }
 
     private static void allocateSnake() {
         if (head == null)
             return;
-        board = new char[20][20];
+        board[tail.x][tail.y] = 0;
         Node n = head;
         while (n != null) {
             if (n != head && n.x == head.x && n.y == head.y) {
                 return;
             }
             // print location of snake
-            System.out.printf("value %c => %d %d\t", n.value, n.x, n.y);
+            // System.out.printf("value %c => %d %d\t", n.value, n.x, n.y);
             board[n.x][n.y] = n.value;
             n = n.next;
         }
-        System.out.println();
+        // System.out.println();
         printBoard();
         return;
     }
 
     static void printBoard() {
+
         for (int i = -1; i <= board.length; i++) {
             for (int j = -1; j <= board.length; j++) {
                 if (j == -1 || i == -1 || i == board.length || j == board.length) {
@@ -163,6 +192,7 @@ class Main {
         tail = new Node(n.x, n.y + 1, 'Y');
         n.next = tail;
         tail.prev = n;
+        fruit = makeFruit(head); // make and allocate fruit on board
         allocateSnake();
     }
 }
