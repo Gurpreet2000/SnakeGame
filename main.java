@@ -21,48 +21,100 @@ class Main {
     static char board[][] = new char[20][20];
 
     public static void main(String[] args) throws Exception {
-        // Write your code here
-        startGame();
-        // System.out.println("Welcome\nThis is a snake game.\nTo quit press Q at any
-        // time.\nPress C to continue\n");
-        // Scanner sc = new Scanner(System.in);
-        // char ch = sc.nextLine().charAt(0);
-        // sc.close();
-        // if (ch == 'C') {
-        // startGame();
-        // }
-        // return;
+        System.out.println(
+                "Welcome\nThis is a snake game.\nTo quit press Q at any time.\nPress C to continue.\nMove the snake with L - LEFT, R - RIGHT, U - UP & D-DOWN");
+        startGame(); // start the snake game.
     }
 
     private static void startGame() {
-        initSnake();
-        allocateSnake();
-        printBoard();
+        Scanner sc = new Scanner(System.in);
+        char ch = sc.next().toLowerCase().charAt(0);
+        if (ch == 'c') {
+            initSnake(2); // make initial snake of some size.
+            String directions = "lrud";
+            char dir = sc.next().toLowerCase().charAt(0);
+            Game: while (directions.contains(Character.toString(dir))) {
+                // check if snake can move in the given direction if moveSnake return 1 continue
+                short canMove = moveSnake(dir);
+                if (canMove == -1)
+                    break Game;
+                while (canMove == 0) {
+                    System.out.println("Can't move in this direction, enter another direction.");
+                    dir = sc.next().toLowerCase().charAt(0);
+                    if (dir == 'q')
+                        break Game;
+                    canMove = moveSnake(dir);
+                }
+                // allocate snake on the board
+                allocateSnake();
+                dir = sc.next().toLowerCase().charAt(0);
+            }
+            System.out.println("Game Over!");
+            sc.close();
+        }
+
     }
 
-    private static void initSnake() {
-        head = new Node(5, 5, '<');
-        Node n = head;
-        for (int i = 0; i < 2; i++) {
-            Node nn = new Node(n.x, n.y + 1, '-');
-            n.next = nn;
-            nn.prev = n;
-            n = nn;
+    private static short moveSnake(char d) {
+        // find value of new head
+        int x = 0, y = 0;
+        char val = ' ';
+        if (d == 'l') {
+            x = head.x;
+            y = head.y - 1;
+            val = '<';
+        } else if (d == 'r') {
+            x = head.x;
+            y = head.y + 1;
+            val = '>';
+        } else if (d == 'u') {
+            x = head.x - 1;
+            y = head.y;
+            val = '^';
+        } else if (d == 'd') {
+            x = head.x + 1;
+            y = head.y;
+            val = 'v';
         }
-        tail = new Node(n.x, n.y + 1, '|');
-        n.next = tail;
-        tail.prev = n;
+        // check if direction makes snake go in reverse
+        if (head.next.x == x && head.next.y == y) {
+            allocateSnake();
+            return 0;
+        }
+        // check if snake bites itself
+        for (Node n = head.next; n.next != null; n = n.next) {
+            if (n.x == x && n.y == y)
+                return -1;
+        }
+        // give snake its new coordinates
+        tail = tail.prev;
+        tail.next = null;
+        tail.value = 'Y';
+        Node n = head;
+        n.value = 'x';
+        head = new Node(x, y, val);
+        head.next = n;
+        n.prev = head;
+        return 1;
     }
 
     private static void allocateSnake() {
-        Node n = head;
-        if (n == null)
+        if (head == null)
             return;
+        board = new char[20][20];
+        Node n = head;
         while (n != null) {
+            if (n != head && n.x == head.x && n.y == head.y) {
+                return;
+            }
+            // print location of snake
+            System.out.printf("value %c => %d %d\t", n.value, n.x, n.y);
             board[n.x][n.y] = n.value;
             n = n.next;
         }
-
+        System.out.println();
+        printBoard();
+        return;
     }
 
     static void printBoard() {
@@ -81,5 +133,20 @@ class Main {
             }
             System.out.println("");
         }
+    }
+
+    private static void initSnake(int size) {
+        head = new Node(5, 5, '<');
+        Node n = head;
+        for (int i = 0; i < size; i++) {
+            Node nn = new Node(n.x, n.y + 1, 'x');
+            n.next = nn;
+            nn.prev = n;
+            n = nn;
+        }
+        tail = new Node(n.x, n.y + 1, 'Y');
+        n.next = tail;
+        tail.prev = n;
+        allocateSnake();
     }
 }
