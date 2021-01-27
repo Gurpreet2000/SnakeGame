@@ -22,56 +22,68 @@ class Main {
 
     public static void main(String[] args) throws Exception {
         System.out.println(
-                "Welcome\nThis is a snake game.\nTo quit press Q at any time.\nPress C to continue.\nMove the snake with L - LEFT, R - RIGHT, U - UP & D-DOWN");
-        startGame(); // start the snake game.
+                "Welcome\nThis is a snake game.\nTo quit press Q at any time.\nPress C to continue.\nMove the snake with W - UP, S - DOWN, A - LEFT & D - RIGHT");
+        Scanner sc = new Scanner(System.in);
+        while (!sc.hasNext("[cqQC]")) {
+            System.out.println("Invalid input!");
+            sc.nextLine();
+        }
+        char ch = sc.next().toLowerCase().charAt(0);
+        if (ch == 'c') {
+            startGame(); // start the snake game.
+        }
     }
 
     private static void startGame() {
-        Scanner sc = new Scanner(System.in);
-        char ch = sc.next().toLowerCase().charAt(0);
-        if (ch == 'c') {
-            initSnake(2); // make initial snake of some size.
-            String directions = "lrud";
-            char dir = sc.next().toLowerCase().charAt(0);
-            Game: while (directions.contains(Character.toString(dir))) {
-                // check if snake can move in the given direction if moveSnake return 1 continue
-                short canMove = moveSnake(dir);
-                if (canMove == -1)
+        initSnake(2); // make initial snake of some size.
+        String directions = "wsad"; // valid directions
+        char dir = inputDirection();
+        Game: while (directions.contains(Character.toString(dir))) {
+            // check if snake can move in the given direction if moveSnake return 1 continue
+            short canMove = moveSnake(dir);
+            if (canMove == -1)
+                break Game;
+            while (canMove == 0) {
+                System.out.println("Can't move in this direction, enter another direction.");
+                dir = inputDirection();
+                if (dir == 'q')
                     break Game;
-                while (canMove == 0) {
-                    System.out.println("Can't move in this direction, enter another direction.");
-                    dir = sc.next().toLowerCase().charAt(0);
-                    if (dir == 'q')
-                        break Game;
-                    canMove = moveSnake(dir);
-                }
-                // allocate snake on the board
-                allocateSnake();
-                dir = sc.next().toLowerCase().charAt(0);
+                canMove = moveSnake(dir);
             }
-            System.out.println("Game Over!");
-            sc.close();
+            // allocate snake on the board
+            allocateSnake();
+            dir = inputDirection();
         }
+        System.out.println("Game Over!");
+    }
 
+    static char inputDirection() {
+        Scanner sc = new Scanner(System.in);
+        while (!sc.hasNext("[qwsadQWSAD]")) {
+            System.out.println("Invalid input!");
+            sc.nextLine();
+        }
+        char dir = sc.next().toLowerCase().charAt(0);
+        return dir;
     }
 
     private static short moveSnake(char d) {
         // find value of new head
         int x = 0, y = 0;
         char val = ' ';
-        if (d == 'l') {
+        if (d == 'a') {
             x = head.x;
             y = head.y - 1;
             val = '<';
-        } else if (d == 'r') {
+        } else if (d == 'd') {
             x = head.x;
             y = head.y + 1;
             val = '>';
-        } else if (d == 'u') {
+        } else if (d == 'w') {
             x = head.x - 1;
             y = head.y;
             val = '^';
-        } else if (d == 'd') {
+        } else if (d == 's') {
             x = head.x + 1;
             y = head.y;
             val = 'v';
