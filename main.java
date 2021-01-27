@@ -15,6 +15,10 @@ class Node {
     }
 }
 
+class Fruit {
+    int x, y;
+}
+
 class Main {
 
     static Node head = null, tail = null;
@@ -36,9 +40,8 @@ class Main {
 
     private static void startGame() {
         initSnake(2); // make initial snake of some size.
-        String directions = "wsad"; // valid directions
         char dir = inputDirection();
-        Game: while (directions.contains(Character.toString(dir))) {
+        Game: while (dir != 'q') {
             // check if snake can move in the given direction if moveSnake return 1 continue
             short canMove = moveSnake(dir);
             if (canMove == -1)
@@ -148,7 +151,8 @@ class Main {
     }
 
     private static void initSnake(int size) {
-        head = new Node(5, 5, '<');
+        Random r = new Random();
+        head = new Node(r.nextInt(board.length - 1), r.nextInt(board.length - 1), '<');
         Node n = head;
         for (int i = 0; i < size; i++) {
             Node nn = new Node(n.x, n.y + 1, 'x');
