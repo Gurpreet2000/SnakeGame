@@ -1,34 +1,13 @@
-import java.util.*;
-
+import java.util.Scanner;
+import java.util.Random;
 // Other imports go here
-
-class Node {
-    int x, y;
-    char value;
-    Node next;
-    Node prev;
-
-    Node(int x, int y, char value) {
-        this.x = x;
-        this.y = y;
-        this.value = value;
-    }
-}
-
-class Fruit {
-    int x, y;
-
-    Fruit(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-}
 
 class Main {
 
     static Node head = null, tail = null;
     static char board[][] = new char[20][20];
     static Fruit fruit = null;
+    static boolean isAllocated = false;
 
     public static void main(String[] args) throws Exception {
         System.out.println(
@@ -46,12 +25,14 @@ class Main {
 
     private static void startGame() {
         initSnake(2); // make initial snake of some size.
-        fruit = makeFruit(head); // make and allocate fruit on board
         allocateSnake();
+        fruit = makeFruit(head); // make and allocate fruit on board
+        printBoard();
         char dir = inputDirection();
         Game: while (dir != 'q') {
             // check if snake can move in the given direction if moveSnake return 1 continue
             short canMove = moveSnake(dir);
+            isAllocated = false;
             if (canMove == -1)
                 break Game;
             while (canMove == 0) {
@@ -62,7 +43,9 @@ class Main {
                 canMove = moveSnake(dir);
             }
             // allocate snake on the board
-            allocateSnake();
+            if (!isAllocated)
+                allocateSnake();
+            printBoard();
             dir = inputDirection();
         }
         System.out.println("Game Over!");
@@ -72,20 +55,16 @@ class Main {
         Node n = head;
         Random r = new Random();
         Fruit f = new Fruit(r.nextInt(board.length - 1), r.nextInt(board.length - 1));
-        while (n != null) {
-            if (f.x == head.x && f.y == head.y) {
-                f = new Fruit(r.nextInt(board.length - 1), r.nextInt(board.length - 1));
-            } else {
-                n = n.next;
-            }
+        if (board[f.x][f.y] != 0) {
+            f = makeFruit(head);
         }
-        board[f.x][f.y] = 'F';
+        board[f.x][f.y] = 'o';
         return f;
     }
 
     static char inputDirection() {
         Scanner sc = new Scanner(System.in);
-        while (!sc.hasNext("[qwsadQWSAD]")) {
+        while (!sc.hasNext("[qwsadQWSAD]*")) {
             System.out.println("Invalid input!");
             sc.nextLine();
         }
@@ -128,7 +107,6 @@ class Main {
         }
         // check if direction makes snake go in reverse
         if (head.next.x == x && head.next.y == y) {
-            allocateSnake();
             return 0;
         }
         // check if snake bites itself
@@ -145,6 +123,8 @@ class Main {
         n.prev = head;
         // check is snake ate fruit
         if (fruit.x == head.x && fruit.y == head.y) {
+            allocateSnake();
+            isAllocated = true;
             fruit = makeFruit(head);
         } else {
             board[tail.x][tail.y] = 0;
@@ -170,7 +150,6 @@ class Main {
             n = n.next;
         }
         // System.out.println();
-        printBoard();
         return;
     }
 
