@@ -46,6 +46,8 @@ class Main {
 
     private static void startGame() {
         initSnake(2); // make initial snake of some size.
+        fruit = makeFruit(head); // make and allocate fruit on board
+        allocateSnake();
         char dir = inputDirection();
         Game: while (dir != 'q') {
             // check if snake can move in the given direction if moveSnake return 1 continue
@@ -96,21 +98,33 @@ class Main {
         int x = 0, y = 0;
         char val = ' ';
         if (d == 'a') {
+            val = '<';
             x = head.x;
             y = head.y - 1;
-            val = '<';
+            if (y == -1) {
+                y = board.length - 1;
+            }
         } else if (d == 'd') {
+            val = '>';
             x = head.x;
             y = head.y + 1;
-            val = '>';
+            if (y == board.length) {
+                y = 0;
+            }
         } else if (d == 'w') {
+            val = '^';
             x = head.x - 1;
             y = head.y;
-            val = '^';
+            if (x == -1) {
+                x = board.length - 1;
+            }
         } else if (d == 's') {
+            val = 'v';
             x = head.x + 1;
             y = head.y;
-            val = 'v';
+            if (x == board.length) {
+                x = 0;
+            }
         }
         // check if direction makes snake go in reverse
         if (head.next.x == x && head.next.y == y) {
@@ -161,7 +175,8 @@ class Main {
     }
 
     static void printBoard() {
-
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
         for (int i = -1; i <= board.length; i++) {
             for (int j = -1; j <= board.length; j++) {
                 if (j == -1 || i == -1 || i == board.length || j == board.length) {
@@ -192,7 +207,5 @@ class Main {
         tail = new Node(n.x, n.y + 1, 'Y');
         n.next = tail;
         tail.prev = n;
-        fruit = makeFruit(head); // make and allocate fruit on board
-        allocateSnake();
     }
 }
